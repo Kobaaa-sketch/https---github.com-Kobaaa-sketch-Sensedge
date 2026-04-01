@@ -137,7 +137,8 @@ router.get("/checkout/test-email", async (req, res) => {
 
 app.use(cors());
 app.use(express.json());
-// Handle both /api prefix and root for flexibility with redirects
+// Handle all common path prefixes for Netlify and local dev
+app.use("/.netlify/functions/api", router);
 app.use("/api", router);
 app.use("/", router);
 
