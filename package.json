@@ -12,20 +12,24 @@
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "cors": "^2",
+    "drizzle-orm": "^0.45.2",
     "express": "^5",
+    "nodemailer": "^6.10.0",
     "pino": "^9",
     "pino-http": "^10",
     "stripe": "^21.0.1",
-    "nodemailer": "^6.10.0"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.17",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "@types/nodemailer": "^6.4.17",
     "esbuild": "^0.27.3",
     "esbuild-plugin-pino": "^2.3.3",
     "pino-pretty": "^13",
+    "tailwindcss": "^4.2.2",
     "thread-stream": "3.1.0"
   }
 }
