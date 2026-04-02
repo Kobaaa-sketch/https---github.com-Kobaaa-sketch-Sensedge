@@ -1,6 +1,6 @@
 [build]
   base = "sensedge"
-  command = "npm install && npx vite build"
+  command = "pnpm install && pnpm run build"
   publish = "dist/public"
   functions = "netlify/functions"
 
