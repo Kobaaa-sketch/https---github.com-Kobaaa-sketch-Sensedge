@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { X, ShieldCheck, Zap, Lock, AlertTriangle, ShoppingCart } from "lucide-react";
 import { CheatProduct } from "@/lib/products-data";
 
@@ -26,7 +26,7 @@ function StripeCheckout({ product, variant, onClose }: {
 
   const price = parsePrice(variant?.price || product.price);
 
-  async function handleCheckout(e: React.FormEvent) {
+  async function handleCheckout(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email) {
       setError("Veuillez renseigner votre adresse email");
@@ -51,20 +51,18 @@ function StripeCheckout({ product, variant, onClose }: {
 
       const data = await response.json();
 
-      if (data.error === "stripe_not_configured") {
-        setError("stripe_not_configured");
-      } else if (data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = data.url;
-      } else {
-        setError(`${data.message || "Erreur serveur"} (Status: ${response.status})`);
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || `Erreur serveur (${response.status})`);
       }
-    } catch (err) {
-      setError(`Impossible de contacter le serveur de paiement (Vériﬁez votre connexion ou les logs Netlify)`);
-    } finally {
-      if (!window.location.href.includes("stripe.com")) {
-        setLoading(false);
+
+      if (!data.url) {
+        throw new Error("Aucune URL de redirection Stripe reçue.");
       }
+
+      window.location.href = data.url;
+    } catch (err: any) {
+      setError(err.message || "Impossible de contacter le serveur de paiement.");
+      setLoading(false);
     }
   }
 

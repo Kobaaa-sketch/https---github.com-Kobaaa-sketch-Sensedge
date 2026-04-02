@@ -64,11 +64,16 @@ async function sendOrderNotification({
 // 1. Create Checkout Session
 router.post("/checkout/create-session", async (req: Request, res: Response) => {
   const stripe = getStripe();
-  if (!stripe) return res.status(503).json({ error: "stripe_not_configured" });
+  if (!stripe) return res.status(503).json({ error: "stripe_not_configured", message: "Stripe secret key not set" });
 
   const { amount, currency = "eur", productName, productId, clientEmail } = req.body;
 
+  if (!amount || !productName || !clientEmail) {
+    return res.status(400).json({ error: "invalid_request", message: "Missing required checkout fields" });
+  }
+
   const orderNumber = `SE-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const clientUrl = process.env["CLIENT_URL"] || process.env["URL"] || "http://localhost:5173";
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -77,14 +82,14 @@ router.post("/checkout/create-session", async (req: Request, res: Response) => {
         price_data: {
           currency,
           product_data: { name: productName, metadata: { productId, orderNumber } },
-          unit_amount: Math.round(amount * 100),
+          unit_amount: Math.round(Number(amount) * 100),
         },
         quantity: 1,
       }],
       mode: "payment",
       customer_email: clientEmail,
-      success_url: `${process.env["URL"] || "http://localhost:5173"}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env["URL"] || "http://localhost:5173"}/#products`,
+      success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${clientUrl}/#products`,
       metadata: { productName, productId, orderNumber, clientEmail: clientEmail || "unknown" },
     });
 
@@ -95,7 +100,7 @@ router.post("/checkout/create-session", async (req: Request, res: Response) => {
 });
 
 // 2. Webhook
-router.post("/webhook", express.raw({ type: "application/json" }), async (req: Request, res: Response) => {
+router.post("/webhook", async (req: Request, res: Response) => {
   const stripe = getStripe();
   const sig = req.headers["stripe-signature"];
   const webhookSecret = process.env["STRIPE_WEBHOOK_SECRET"];
@@ -136,7 +141,10 @@ router.get("/checkout/test-email", async (req, res) => {
 });
 
 app.use(cors());
-app.use(express.json());
+app.use("/.netlify/functions/api/webhook", express.raw({ type: "application/json" }));
+app.use("/api/webhook", express.raw({ type: "application/json" }));
+app.use("/webhook", express.raw({ type: "application/json" }));
+app.use(express.json({ limit: "1mb" }));
 
 // Handle all common path prefixes for Netlify and local dev
 app.use("/.netlify/functions/api", router);
