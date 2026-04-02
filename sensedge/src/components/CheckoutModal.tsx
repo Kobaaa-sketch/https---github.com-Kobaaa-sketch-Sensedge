@@ -1,19 +1,6 @@
-import { useState, useEffect } from "react";
-import {
-  loadStripe,
-  type StripeElementsOptions,
-} from "@stripe/stripe-js";
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
+import { useState } from "react";
 import { X, ShieldCheck, Zap, Lock, AlertTriangle, ShoppingCart } from "lucide-react";
 import { CheatProduct } from "@/lib/products-data";
-
-const STRIPE_PK = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | undefined;
-const stripePromise = STRIPE_PK ? loadStripe(STRIPE_PK) : null;
 
 const API_BASE = "/api";
 
