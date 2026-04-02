@@ -1,7 +1,7 @@
 [build]
   base = "sensedge"
   command = "pnpm install && pnpm run build"
-  publish = "dist/public"
+  publish = "dist"
   functions = "netlify/functions"
 
 [build.environment]
@@ -10,4 +10,3 @@
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
-  status = 200
